@@ -14,13 +14,13 @@ namespace Erfa.Api
 
             builder.Services.AddOcelot();
 
-            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            var policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
             var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
+                options.AddPolicy(name: policyName,
                                   policy =>
                                   {
                                       policy.WithOrigins(origins)
