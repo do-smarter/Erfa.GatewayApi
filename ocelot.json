@@ -12,7 +12,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/c/login",
-      "UpstreamHttpMethod": [ "POST" ]
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
     {
       "DownstreamPathTemplate": "/api/Auth/Logout",
@@ -24,7 +24,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/c/logout",
-      "UpstreamHttpMethod": [ "POST" ]
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
 
     {
