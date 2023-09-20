@@ -8,14 +8,14 @@ namespace Erfa.Api
 {
     public static class Startup
     {
-        static string policyName = "policy";
+
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
             var configuration = builder.Configuration;
 
             builder.Services.AddOcelot();
 
-            policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
+            var policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
             var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
 
@@ -82,8 +82,11 @@ namespace Erfa.Api
                     await context.Response.WriteAsync("Erfa - API Gateway");
                 });
             });
-            app.UseCors(policyName);
-            var x = policyName;
+            var policy = app.Configuration.GetSection("Cors").GetSection("policyName").Value;
+                
+                
+               // ["Cors:policyName"].IsNullOrEmpty() ? app.Configuration["Cors:policyName"] : "policy";
+            app.UseCors(policy);
             app.UseOcelot();
 
             app.UseAuthentication();
