@@ -8,13 +8,14 @@ namespace Erfa.Api
 {
     public static class Startup
     {
+        static string policyName = "policy";
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
             var configuration = builder.Configuration;
 
             builder.Services.AddOcelot();
 
-            var policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
+            policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
             var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
 
@@ -39,7 +40,7 @@ namespace Erfa.Api
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
-                    {
+                    {                        
                         var token = "Bearer " + context.Request.Cookies["X-Access-Token"];
                         context.Token = context.Request.Cookies["X-Access-Token"];
                         return Task.CompletedTask;
@@ -56,6 +57,10 @@ namespace Erfa.Api
                     ValidateIssuerSigningKey = true
                 };
             });
+
+            //builder.Services.AddEndpointsApiExplorer();
+            //builder.Services.AddSwaggerGen();
+
             return builder.Build();
         }
 
@@ -64,6 +69,8 @@ namespace Erfa.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                //app.UseSwagger();
+                //app.UseSwaggerUI();
             }
 
             app.UseRouting();
@@ -75,8 +82,8 @@ namespace Erfa.Api
                     await context.Response.WriteAsync("Erfa - API Gateway");
                 });
             });
-            app.UseCors("_myAllowSpecificOrigins");
-
+            app.UseCors(policyName);
+            var x = policyName;
             app.UseOcelot();
 
             app.UseAuthentication();

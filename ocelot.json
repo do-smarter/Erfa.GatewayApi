@@ -14,6 +14,7 @@
       "UpstreamPathTemplate": "/api/c/login",
       "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
+    
     {
       "DownstreamPathTemplate": "/api/Auth/Logout",
       "DownstreamScheme": "http",
@@ -46,8 +47,6 @@
       }
     },
 
-
-
     {
       "DownstreamPathTemplate": "/api/Auth/ResetPassword",
       "DownstreamScheme": "http",
@@ -63,15 +62,21 @@
 
     {
       "DownstreamPathTemplate": "/api/{version}/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 7036
+          "Port": 5013
         }
       ],
       "UpstreamPathTemplate": "/api/{version}/c/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "Delete" ]
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET", "Delete", "OPTIONS" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "role": [ "Magda", "OLA" ]
+      }
     }
 
 
