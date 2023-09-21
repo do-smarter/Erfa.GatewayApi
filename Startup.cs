@@ -5,6 +5,7 @@ using Ocelot.DependencyInjection;
 using Ocelot.Authorization.Middleware;
 using Ocelot.Middleware;
 using System.Text;
+using System;
 
 namespace Erfa.Api
 {
@@ -63,7 +64,6 @@ namespace Erfa.Api
             //builder.Services.AddEndpointsApiExplorer();
             //builder.Services.AddSwaggerGen();
 
-            //    builder.Services.AddTransient<OcelotMiddleware, OcelotJwtMiddleware>();
 
             return builder.Build();
         }
@@ -92,15 +92,22 @@ namespace Erfa.Api
             app.UseCors(policy);
 
 
+            var loggerFactory = (ILoggerFactory)new LoggerFactory();
+            var logger = loggerFactory.CreateLogger<OcelotJwtMiddleware>();
 
+
+            var configuration = new OcelotPipelineConfiguration
+            {
+                AuthorizationMiddleware = async (ctx, next) =>
+                {
+                    await new OcelotJwtMiddleware(next, logger).Invoke(ctx);
+                }
+            };
+            app.UseOcelot(configuration);
 
             app.UseAuthentication();
             app.UseAuthorization();
-  app.UseOcelot();
 
-            app.UseCustomOcelotAuthorizationHandler();
-
-          
             return app;
         }
     }

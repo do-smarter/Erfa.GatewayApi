@@ -37,15 +37,16 @@
           "Port": 5055
         }
       ],
-      "UpstreamPathTemplate": "/api/c/register_employee",
-      "UpstreamHttpMethod": [ "POST" ],
       "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer"
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
       },
       "RouteClaimsRequirement": {
-        "role": "HRAdmin,ProdAdmin"
+        "Role":"HRAdmin"
 
-      }
+      },
+      "UpstreamPathTemplate": "/api/c/register_employee",
+      "UpstreamHttpMethod": [ "POST" ]
     },
 
     {

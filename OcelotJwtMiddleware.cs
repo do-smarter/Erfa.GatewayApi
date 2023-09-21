@@ -1,4 +1,5 @@
-﻿using Ocelot.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Ocelot.Authorization;
 using Ocelot.Configuration;
 using Ocelot.DownstreamRouteFinder.UrlMatcher;
 using Ocelot.Logging;
@@ -6,91 +7,101 @@ using Ocelot.Middleware;
 using Ocelot.Responses;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
-
 
 namespace Erfa.GatewayApi
 {
-    public class OcelotJwtMiddleware : OcelotMiddleware
+    public class OcelotJwtMiddleware
     {
-        private readonly RequestDelegate _next;
+        private readonly Func<Task> _next;
+        private readonly ILogger<OcelotJwtMiddleware> _logger;
 
-
-        private readonly IScopesAuthorizer _scopesAuthorizer;
-
-        public OcelotJwtMiddleware(RequestDelegate next, IScopesAuthorizer scopesAuthorizer, IOcelotLoggerFactory loggerFactory)
-            : base(loggerFactory.CreateLogger<OcelotJwtMiddleware>())
+        public OcelotJwtMiddleware(Func<Task> next, ILogger<OcelotJwtMiddleware> logger)
         {
             _next = next;
-            _scopesAuthorizer = scopesAuthorizer;
+            _logger = logger;
         }
-
         public async Task Invoke(HttpContext httpContext)
         {
-            DownstreamRoute downstreamRoute = httpContext.Items.DownstreamRoute();
+            DownstreamRoute downstreamRoute = (DownstreamRoute)httpContext.Items["DownstreamRoute"];
+
             if (!IsOptionsHttpMethod(httpContext) && IsAuthenticatedRoute(downstreamRoute))
             {
-                base.Logger.LogInformation("route is authenticated scopes must be checked");
-                Response<bool> response = _scopesAuthorizer.Authorize(httpContext.User, downstreamRoute.AuthenticationOptions.AllowedScopes);
+                _logger.LogInformation
+                ("route is authenticated scopes must be checked");
+                Response<bool> response = Authorize(httpContext.User, downstreamRoute.AuthenticationOptions.AllowedScopes);
                 if (response.IsError)
                 {
-                    base.Logger.LogWarning("error authorizing user scopes");
+
+                    _logger.LogWarning
+                    ("error authorizing user scopes");
                     httpContext.Items.UpsertErrors(response.Errors);
                     return;
                 }
                 if (IsAuthorized(response))
                 {
-                    base.Logger.LogInformation("user scopes is authorized calling next authorization checks");
+                    _logger.LogInformation
+                    ("user scopes is authorized calling next authorization checks");
                 }
                 else
                 {
-                    base.Logger.LogWarning("user scopes is not authorized setting pipeline error");
+                    _logger.LogWarning
+                    ("user scopes is not authorized setting pipeline error");
                     httpContext.Items.SetError(new UnauthorizedError(httpContext.User.Identity!.Name + " unable to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue));
                 }
             }
+
             if (!IsOptionsHttpMethod(httpContext) && IsAuthorizedRoute(downstreamRoute))
             {
-                base.Logger.LogInformation("route is authorized");
+                _logger.LogInformation
+                ("route is authorized");
                 Response<bool> response2 = Authorize(httpContext.User, downstreamRoute.RouteClaimsRequirement, httpContext.Items.TemplatePlaceholderNameAndValues());
                 if (response2.IsError)
                 {
-                    base.Logger.LogWarning("Error whilst authorizing " + httpContext.User.Identity!.Name + ". Setting pipeline error");
+                    _logger.LogWarning
+                    ("MAGDA" + "Error whilst authorizing " + httpContext.User.Identity!.Name + ". Setting pipeline error");
                     httpContext.Items.UpsertErrors(response2.Errors);
                 }
                 else if (IsAuthorized(response2))
                 {
-                    base.Logger.LogInformation(httpContext.User.Identity!.Name + " has succesfully been authorized for " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ".");
-                    await _next(httpContext);
+                    _logger.LogInformation
+                    ("MAGDA" + httpContext.User.Identity!.Name + " has succesfully been authorized for " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ".");
+                    /* await _next(httpContext); */
+                    await _next();
                 }
                 else
                 {
-                    base.Logger.LogWarning(httpContext.User.Identity!.Name + " is not authorized to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ". Setting pipeline error");
+                    _logger.LogWarning
+                    ("MAGDA" + httpContext.User.Identity!.Name + " is not authorized to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ". Setting pipeline error");
                     httpContext.Items.SetError(new UnauthorizedError(httpContext.User.Identity!.Name + " is not authorized to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue));
                 }
             }
             else
             {
-                base.Logger.LogInformation(downstreamRoute.DownstreamPathTemplate.Value + " route does not require user to be authorized");
-                await _next(httpContext);
+                _logger.LogInformation
+                (downstreamRoute.DownstreamPathTemplate.Value + " route does not require user to be authorized");
+                /* await _next(httpContext); */
+                await _next();
             }
         }
 
-        private static bool IsAuthorized(Response<bool> authorized)
+        private bool IsAuthorized(Response<bool> authorized)
         {
-            return authorized.Data;
+            var x = authorized.Data;
+            return x;
         }
 
-        private static bool IsAuthenticatedRoute(DownstreamRoute route)
+        private bool IsAuthenticatedRoute(DownstreamRoute route)
         {
-            return route.IsAuthenticated;
+            var v = route.IsAuthenticated;
+            return v;
         }
 
-        private static bool IsAuthorizedRoute(DownstreamRoute route)
+        private bool IsAuthorizedRoute(DownstreamRoute route)
         {
             return route.IsAuthorized;
         }
 
-        private static bool IsOptionsHttpMethod(HttpContext httpContext)
+        private bool IsOptionsHttpMethod(HttpContext httpContext)
         {
             return httpContext.Request.Method.ToUpper() == "OPTIONS";
         }
@@ -98,9 +109,10 @@ namespace Erfa.GatewayApi
 
         private Response<List<string>> GetValuesByClaimType(IEnumerable<Claim> claims, string claimType)
         {
-            return new OkResponse<List<string>>((from x in claims
-                                                 where x.Type == claimType
-                                                 select x.Value).ToList());
+            var c = (from x in claims
+                     where x.Type == claimType
+                     select x.Value).ToList();
+            return new OkResponse<List<string>>(c);
         }
 
 
@@ -115,58 +127,27 @@ namespace Erfa.GatewayApi
                 }
                 if (valuesByClaimType.Data != null)
                 {
-                    string[] valuses = item.Value.Split(',');
+                    string[] allowedRoles = item.Value.Split(',');
                     var matching = false;
                     List<string> variableNames = new List<string>();
-                    foreach (var value in valuses)
+
+
+                    foreach (var value in valuesByClaimType.Data)
                     {
-                        Match match = Regex.Match(value, "^{(?<variable>.+)}$");
-                        if (match.Success)
+                        foreach (var allowedRole in allowedRoles)
                         {
-                            matching = true;
-                            variableNames.Add(value);
+                            if (allowedRole.ToUpper().Equals(value.ToUpper()))
+                            {
+                                matching = true;
+                                variableNames.Add(value);
+                            }
                         }
                     }
 
                     if (matching)
                     {
-                        string variableName = string.Join(",", variableNames);
-                        PlaceholderNameAndValue[] array = urlPathPlaceholderNameAndValues.Where((PlaceholderNameAndValue p) => p.Name.Equals(variableName)).Take(2).ToArray();
-                        if (array.Length != 1)
-                        {
-                            if (array.Length == 0)
-                            {
-                                return new ErrorResponse<bool>(new ClaimValueNotAuthorizedError("config error: requires variable claim value: " + variableName + " placeholders does not contain that variable: " + string.Join(", ", urlPathPlaceholderNameAndValues.Select((PlaceholderNameAndValue p) => p.Name))));
-                            }
-                            return new ErrorResponse<bool>(new ClaimValueNotAuthorizedError("config error: requires variable claim value: " + item.Value + " but placeholders are ambiguous: " + string.Join(", ", from p in urlPathPlaceholderNameAndValues
-                                                                                                                                                                                                                   where p.Name.Equals(variableName)
-                                                                                                                                                                                                                   select p.Value)));
-                        }
-                        string value = array[0].Value;
-                        if (!valuesByClaimType.Data.Contains(value))
-                        {
-                            DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(64, 3);
-                            defaultInterpolatedStringHandler.AppendLiteral("dynamic claim value for ");
-                            defaultInterpolatedStringHandler.AppendFormatted(variableName);
-                            defaultInterpolatedStringHandler.AppendLiteral(" of ");
-                            defaultInterpolatedStringHandler.AppendFormatted(string.Join(", ", valuesByClaimType.Data));
-                            defaultInterpolatedStringHandler.AppendLiteral(" is not the same as required value: ");
-                            defaultInterpolatedStringHandler.AppendFormatted(value);
-                            return new ErrorResponse<bool>(new ClaimValueNotAuthorizedError(defaultInterpolatedStringHandler.ToStringAndClear()));
-                        }
+                        continue;
                     }
-                    else if (!valuesByClaimType.Data.Contains(item.Value))
-                    {
-                        DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(60, 3);
-                        defaultInterpolatedStringHandler.AppendLiteral("claim value: ");
-                        defaultInterpolatedStringHandler.AppendFormatted(string.Join(", ", valuesByClaimType.Data));
-                        defaultInterpolatedStringHandler.AppendLiteral(" is not the same as required value: ");
-                        defaultInterpolatedStringHandler.AppendFormatted(item.Value);
-                        defaultInterpolatedStringHandler.AppendLiteral(" for type: ");
-                        defaultInterpolatedStringHandler.AppendFormatted(item.Key);
-                        return new ErrorResponse<bool>(new ClaimValueNotAuthorizedError(defaultInterpolatedStringHandler.ToStringAndClear()));
-                    }
-                    continue;
                 }
                 return new ErrorResponse<bool>(new UserDoesNotHaveClaimError("user does not have claim " + item.Key));
             }
@@ -174,7 +155,29 @@ namespace Erfa.GatewayApi
         }
 
 
-
+        private Response<bool> Authorize(ClaimsPrincipal claimsPrincipal, List<string> routeAllowedScopes)
+        {
+            if (routeAllowedScopes == null || routeAllowedScopes.Count == 0)
+            {
+                return new OkResponse<bool>(data: true);
+            }
+            Response<List<string>> valuesByClaimType = GetValuesByClaimType(claimsPrincipal.Claims, "scope");
+            if (valuesByClaimType.IsError)
+            {
+                return new ErrorResponse<bool>(valuesByClaimType.Errors);
+            }
+            List<string> data = valuesByClaimType.Data;
+            if (!routeAllowedScopes.Intersect(data).Any())
+            {
+                DefaultInterpolatedStringHandler defaultInterpolatedStringHandler = new DefaultInterpolatedStringHandler(55, 2);
+                defaultInterpolatedStringHandler.AppendLiteral("no one user scope: '");
+                defaultInterpolatedStringHandler.AppendFormatted(string.Join(',', data));
+                defaultInterpolatedStringHandler.AppendLiteral("' match with some allowed scope: '");
+                defaultInterpolatedStringHandler.AppendFormatted(string.Join(',', routeAllowedScopes));
+                defaultInterpolatedStringHandler.AppendLiteral("'");
+                return new ErrorResponse<bool>(new ScopeNotAuthorizedError(defaultInterpolatedStringHandler.ToStringAndClear()));
+            }
+            return new OkResponse<bool>(data: true);
+        }
     }
-
 }
