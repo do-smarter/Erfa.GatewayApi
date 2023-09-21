@@ -1,26 +1,30 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Erfa.GatewayApi;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
+using Ocelot.Authorization.Middleware;
 using Ocelot.Middleware;
 using System.Text;
+using System;
 
 namespace Erfa.Api
 {
     public static class Startup
     {
+
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
             var configuration = builder.Configuration;
 
             builder.Services.AddOcelot();
 
-            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+            var policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
             var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
+                options.AddPolicy(name: policyName,
                                   policy =>
                                   {
                                       policy.WithOrigins(origins)
@@ -56,6 +60,11 @@ namespace Erfa.Api
                     ValidateIssuerSigningKey = true
                 };
             });
+
+            //builder.Services.AddEndpointsApiExplorer();
+            //builder.Services.AddSwaggerGen();
+
+
             return builder.Build();
         }
 
@@ -64,6 +73,8 @@ namespace Erfa.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                //app.UseSwagger();
+                //app.UseSwaggerUI();
             }
 
             app.UseRouting();
@@ -75,9 +86,24 @@ namespace Erfa.Api
                     await context.Response.WriteAsync("Erfa - API Gateway");
                 });
             });
-            app.UseCors("_myAllowSpecificOrigins");
+            var policy = app.Configuration.GetSection("Cors").GetSection("policyName").Value;
 
-            app.UseOcelot();
+
+            app.UseCors(policy);
+
+
+            var loggerFactory = (ILoggerFactory)new LoggerFactory();
+            var logger = loggerFactory.CreateLogger<OcelotJwtMiddleware>();
+
+
+            var configuration = new OcelotPipelineConfiguration
+            {
+                AuthorizationMiddleware = async (ctx, next) =>
+                {
+                    await new OcelotJwtMiddleware(next, logger).Invoke(ctx);
+                }
+            };
+            app.UseOcelot(configuration);
 
             app.UseAuthentication();
             app.UseAuthorization();
