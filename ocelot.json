@@ -14,7 +14,7 @@
       "UpstreamPathTemplate": "/api/c/login",
       "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
     },
-    
+
     {
       "DownstreamPathTemplate": "/api/Auth/Logout",
       "DownstreamScheme": "http",
@@ -43,7 +43,8 @@
         "AuthenticationProviderKey": "Bearer"
       },
       "RouteClaimsRequirement": {
-        "role": [ "HRAdmin" ]
+        "role": "HRAdmin,ProdAdmin"
+
       }
     },
 

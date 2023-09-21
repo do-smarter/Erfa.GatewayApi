@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Erfa.GatewayApi;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
+using Ocelot.Authorization.Middleware;
 using Ocelot.Middleware;
 using System.Text;
 
@@ -40,7 +42,7 @@ namespace Erfa.Api
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
-                    {                        
+                    {
                         var token = "Bearer " + context.Request.Cookies["X-Access-Token"];
                         context.Token = context.Request.Cookies["X-Access-Token"];
                         return Task.CompletedTask;
@@ -60,6 +62,8 @@ namespace Erfa.Api
 
             //builder.Services.AddEndpointsApiExplorer();
             //builder.Services.AddSwaggerGen();
+
+            //    builder.Services.AddTransient<OcelotMiddleware, OcelotJwtMiddleware>();
 
             return builder.Build();
         }
@@ -83,15 +87,20 @@ namespace Erfa.Api
                 });
             });
             var policy = app.Configuration.GetSection("Cors").GetSection("policyName").Value;
-                
-                
-               // ["Cors:policyName"].IsNullOrEmpty() ? app.Configuration["Cors:policyName"] : "policy";
+
+
             app.UseCors(policy);
-            app.UseOcelot();
+
+
+
 
             app.UseAuthentication();
             app.UseAuthorization();
+  app.UseOcelot();
 
+            app.UseCustomOcelotAuthorizationHandler();
+
+          
             return app;
         }
     }
