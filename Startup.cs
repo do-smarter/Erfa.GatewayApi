@@ -2,25 +2,23 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
-using Ocelot.Authorization.Middleware;
 using Ocelot.Middleware;
 using System.Text;
-using System;
 
 namespace Erfa.Api
 {
     public static class Startup
     {
-
         public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
         {
             var configuration = builder.Configuration;
+
+
 
             builder.Services.AddOcelot();
 
             var policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
             var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-
 
             builder.Services.AddCors(options =>
             {
@@ -61,10 +59,6 @@ namespace Erfa.Api
                 };
             });
 
-            //builder.Services.AddEndpointsApiExplorer();
-            //builder.Services.AddSwaggerGen();
-
-
             return builder.Build();
         }
 
@@ -73,34 +67,20 @@ namespace Erfa.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI();
             }
 
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Erfa - API Gateway");
-                });
-            });
             var policy = app.Configuration.GetSection("Cors").GetSection("policyName").Value;
-
 
             app.UseCors(policy);
 
-
             var loggerFactory = (ILoggerFactory)new LoggerFactory();
-            var logger = loggerFactory.CreateLogger<OcelotJwtMiddleware>();
-
+            var logger = loggerFactory.CreateLogger<OcelotAuthorizationMiddleware>();
 
             var configuration = new OcelotPipelineConfiguration
             {
                 AuthorizationMiddleware = async (ctx, next) =>
                 {
-                    await new OcelotJwtMiddleware(next, logger).Invoke(ctx);
+                    await new OcelotAuthorizationMiddleware(next, logger).Invoke(ctx);
                 }
             };
             app.UseOcelot(configuration);

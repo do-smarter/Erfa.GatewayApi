@@ -1,6 +1,22 @@
 {
   "Routes": [
 
+    {
+      "DownstreamPathTemplate": "/api/Auth/ValidateUserToken",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5055
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "UpstreamPathTemplate": "/api/c/authorize",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
 
     {
       "DownstreamPathTemplate": "/api/Auth/Login",
@@ -42,7 +58,7 @@
         "AllowedScopes": []
       },
       "RouteClaimsRequirement": {
-        "Role":"HRAdmin"
+        "Role": "HRAdmin"
 
       },
       "UpstreamPathTemplate": "/api/c/register_employee",

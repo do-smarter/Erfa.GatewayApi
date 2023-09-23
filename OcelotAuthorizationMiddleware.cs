@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Ocelot.Authorization;
+﻿using Ocelot.Authorization;
 using Ocelot.Configuration;
 using Ocelot.DownstreamRouteFinder.UrlMatcher;
-using Ocelot.Logging;
 using Ocelot.Middleware;
 using Ocelot.Responses;
 using System.Runtime.CompilerServices;
@@ -10,12 +8,12 @@ using System.Security.Claims;
 
 namespace Erfa.GatewayApi
 {
-    public class OcelotJwtMiddleware
+    public class OcelotAuthorizationMiddleware
     {
         private readonly Func<Task> _next;
-        private readonly ILogger<OcelotJwtMiddleware> _logger;
+        private readonly ILogger<OcelotAuthorizationMiddleware> _logger;
 
-        public OcelotJwtMiddleware(Func<Task> next, ILogger<OcelotJwtMiddleware> logger)
+        public OcelotAuthorizationMiddleware(Func<Task> next, ILogger<OcelotAuthorizationMiddleware> logger)
         {
             _next = next;
             _logger = logger;
@@ -31,7 +29,6 @@ namespace Erfa.GatewayApi
                 Response<bool> response = Authorize(httpContext.User, downstreamRoute.AuthenticationOptions.AllowedScopes);
                 if (response.IsError)
                 {
-
                     _logger.LogWarning
                     ("error authorizing user scopes");
                     httpContext.Items.UpsertErrors(response.Errors);
@@ -65,7 +62,6 @@ namespace Erfa.GatewayApi
                 {
                     _logger.LogInformation
                     ("MAGDA" + httpContext.User.Identity!.Name + " has succesfully been authorized for " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ".");
-                    /* await _next(httpContext); */
                     await _next();
                 }
                 else
@@ -79,7 +75,6 @@ namespace Erfa.GatewayApi
             {
                 _logger.LogInformation
                 (downstreamRoute.DownstreamPathTemplate.Value + " route does not require user to be authorized");
-                /* await _next(httpContext); */
                 await _next();
             }
         }
@@ -115,7 +110,6 @@ namespace Erfa.GatewayApi
             return new OkResponse<List<string>>(c);
         }
 
-
         private Response<bool> Authorize(ClaimsPrincipal claimsPrincipal, Dictionary<string, string> routeClaimsRequirement, List<PlaceholderNameAndValue> urlPathPlaceholderNameAndValues)
         {
             foreach (KeyValuePair<string, string> item in routeClaimsRequirement)
@@ -130,7 +124,6 @@ namespace Erfa.GatewayApi
                     string[] allowedRoles = item.Value.Split(',');
                     var matching = false;
                     List<string> variableNames = new List<string>();
-
 
                     foreach (var value in valuesByClaimType.Data)
                     {
@@ -153,7 +146,6 @@ namespace Erfa.GatewayApi
             }
             return new OkResponse<bool>(data: true);
         }
-
 
         private Response<bool> Authorize(ClaimsPrincipal claimsPrincipal, List<string> routeAllowedScopes)
         {
