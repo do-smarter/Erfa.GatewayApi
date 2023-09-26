@@ -25,7 +25,6 @@ services:
       - 5060:80
     environment:
       - ConnectionStrings__ErfaProdConnString=Server=data_prod,1660;Database=ProductionManagement;Uid=sa;Pwd=Qwerty!23456;Encrypt=True;TrustServerCertificate=True
-      - ErfaProdConnString='Server=data_prod,1660;Database=ProductionManagement;Uid=sa;Pwd=Qwerty!23456;Encrypt=True;TrustServerCertificate=True'
     networks:
       - erfa  
 
