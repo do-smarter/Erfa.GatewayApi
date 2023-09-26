@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+
+  data_prod:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: erfa_production_mssql
+    ports:
+      - 1660:1660
+    volumes:
+      - ~/apps/mssql/data:/var/lib/mssqlql/data
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Qwerty!23456
+    restart: unless-stopped
+    networks:
+      - erfa
+
+  prod_service:
+    depends_on:
+      - data_prod
+    image: erfa/production-management:1.0
+    container_name: erfa_production_management
+    ports:
+      - 5060:80
+    environment:
+      - ConnectionStrings__ErfaProdConnString=Server=data_prod,1660;Database=ProductionManagement;Uid=sa;Pwd=Qwerty!23456;Encrypt=True;TrustServerCertificate=True
+      - ErfaProdConnString='Server=data_prod,1660;Database=ProductionManagement;Uid=sa;Pwd=Qwerty!23456;Encrypt=True;TrustServerCertificate=True'
+    networks:
+      - erfa  
+
+  data_identity:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: erfa_identity_mssql
+    ports:
+      - 1670:1670
+    volumes:
+      - ~/apps/mssql/data:/var/lib/mssqlql/data
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Qwerty!23456
+      - MSSQL_TCP_PORT=1670
+    restart: unless-stopped
+    networks:
+      - erfa
+
+  identity_service:
+    depends_on:
+      - data_identity
+    image: erfa/identity-service:1.0
+    container_name: erfa_identity_service
+    ports:
+      - 5070:80
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=erfa_identity_mssql,1670;Database=AuthStore;Uid=sa;Pwd=Qwerty!23456;Encrypt=True;TrustServerCertificate=True
+      - DevUser__UserName=mag
+      - Password=Qwer!234
+    networks:
+      - erfa
+
+  gateway_api:
+    image: erfa/gateway-api:1.0
+    container_name: erfa_gataway_api
+    depends_on:
+      - identity_service
+      - prod_service
+    ports:
+      - 5000:80
+    environment:
+        - Cors__PolicyName=dev_policy
+        - Cors__AllowedOrigins__0__=http://127.0.0.1:3000
+        - Cors__AllowedOrigins__1__=https://127.0.0.1:3000
+        - AuthSettings__Key=389!03S-s2A2dA315.35r
+        - AuthSettings__Audience=http://dosmarter.tech
+        - AuthSettings__Issuer=http://dosmarter.tech
+    networks:
+     - erfa
+
+networks:
+    erfa:

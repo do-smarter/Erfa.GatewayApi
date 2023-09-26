@@ -13,8 +13,6 @@ namespace Erfa.Api
         {
             var configuration = builder.Configuration;
 
-
-
             builder.Services.AddOcelot();
 
             var policyName = !configuration["Cors:policyName"].IsNullOrEmpty() ? configuration["Cors:policyName"] : "policy";
@@ -70,6 +68,15 @@ namespace Erfa.Api
             }
 
             var policy = app.Configuration.GetSection("Cors").GetSection("policyName").Value;
+
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Erfa - API Gateway");
+                });
+            });
 
             app.UseCors(policy);
 

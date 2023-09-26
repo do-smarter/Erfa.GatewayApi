@@ -1,0 +1,402 @@
+﻿{
+  "Routes": [
+
+    // ------------------------------------------------------------ //
+    //                    Identity Service
+    // ------------------------------------------------------------ //
+    {
+      "DownstreamPathTemplate": "/api/Auth/ValidateUserToken",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity_service",
+          "Port": 5070
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "UpstreamPathTemplate": "/authorize",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "DownstreamPathTemplate": "/api/Auth/Login",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity_service",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/login",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "DownstreamPathTemplate": "/api/Auth/Logout",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity_service",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/logout",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "DownstreamPathTemplate": "/api/Auth/RegisterEmployee",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity_service",
+          "Port": 5070
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "HRAdmin"
+
+      },
+      "UpstreamPathTemplate": "/register_employee",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "DownstreamPathTemplate": "/api/Auth/ResetPassword",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity_service",
+          "Port": 5070
+        }
+      ],
+      "UpstreamPathTemplate": "/reset_password",
+      "UpstreamHttpMethod": [ "PUT", "OPTIONS" ]
+    },
+    // ----------------------------- //
+
+    // ------------------------------------------------------------ //
+    //                     Production Management
+    // ------------------------------------------------------------ //
+    // Production Items
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/all",
+      "DownstreamPathTemplate": "/api/v1/Item/GetAllItems",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/details/{number}",
+      "DownstreamPathTemplate": "/api/v1/Item/GetItemDetails?ProductNumber={number}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/add",
+      "DownstreamPathTemplate": "/api/v1/Item/CreateItem",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/add_many",
+      "DownstreamPathTemplate": "/api/v1/Item/CreateItemRange",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/range",
+      "DownstreamPathTemplate": "/api/v1/Item/CreateItemRange",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/edit",
+      "DownstreamPathTemplate": "/api/v1/Item/EditItem",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/item/archive",
+      "DownstreamPathTemplate": "/api/v1/Item/ArchiveItem",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // ----------------------------- //
+
+    // Production Group
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/productiongrouop/all",
+      "DownstreamPathTemplate": "/api/v1/ProductionGroup/GetAllProductionGroups",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin,ProdWorker"
+      },
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/productiongrouop/merge",
+      "DownstreamPathTemplate": "/api/v1/ProductionGroup/MergeGroups",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/productiongrouop/add",
+      "DownstreamPathTemplate": "/api/v1/ProductionGroup/AddNewProductionGroup",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/productiongrouop/take_down",
+      "DownstreamPathTemplate": "/api/v1/ProductionGroup/TakeDownProductionGroup",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "DELETE" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/productiongrouop/unite",
+      "DownstreamPathTemplate": "/api/v1/ProductionGroup/UniteProductionGroupsPriority",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // ----------------------------- //
+
+    // Production Items
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/production_item/all",
+      "DownstreamPathTemplate": "/api/v1/ProductionItem/GetAllProductionItems",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin,ProdWorker"
+      },
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/production_item/edit",
+      "DownstreamPathTemplate": "/api/v1/ProductionItem/EditProductionItem",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin"
+      },
+      "UpstreamHttpMethod": [ "PUT" ]
+    },
+    // ----------------------------- //
+    {
+      "UpstreamPathTemplate": "/production_item/change_state",
+      "DownstreamPathTemplate": "/api/v1/ProductionItem/ChangeProductionItemState",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "prod_service",
+          "Port": 5060
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": {
+        "Role": "ProdAdmin,ProdWorker"
+      },
+      "UpstreamHttpMethod": [ "PUT" ]
+    }
+    // ----------------------------- //
+
+
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://identity_service:44306"
+  }
+}

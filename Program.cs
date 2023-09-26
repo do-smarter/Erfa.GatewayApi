@@ -1,6 +1,6 @@
 using Erfa.Api;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("ocelot.json", false, true);
+builder.Configuration.AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", false, true);
 
 var app = builder
     .ConfigureServices()

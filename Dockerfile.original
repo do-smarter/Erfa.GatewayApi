@@ -8,7 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["Erfa.GatewayApi.csproj", "."]
-RUN dotnet restore "./Erfa.GatewayApi.csproj"
+RUN dotnet restore "./Erfa.APi.csproj"
 COPY . .
 WORKDIR "/src/."
 RUN dotnet build "Erfa.GatewayApi.csproj" -c Release -o /app/build
@@ -19,5 +19,4 @@ RUN dotnet publish "Erfa.GatewayApi.csproj" -c Release -o /app/publish /p:UseApp
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-EXPOSE 5000
-ENTRYPOINT ["dotnet", "Erfa.GatewayApi.dll", "--environment=Staging"]
+ENTRYPOINT ["dotnet", "Erfa.GatewayApi.dll"]
