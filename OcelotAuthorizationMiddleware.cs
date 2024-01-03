@@ -55,19 +55,19 @@ namespace Erfa.GatewayApi
                 if (response2.IsError)
                 {
                     _logger.LogWarning
-                    ("MAGDA" + "Error whilst authorizing " + httpContext.User.Identity!.Name + ". Setting pipeline error");
+                    ("Error whilst authorizing " + httpContext.User.Identity!.Name + ". Setting pipeline error");
                     httpContext.Items.UpsertErrors(response2.Errors);
                 }
                 else if (IsAuthorized(response2))
                 {
                     _logger.LogInformation
-                    ("MAGDA" + httpContext.User.Identity!.Name + " has succesfully been authorized for " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ".");
+                    (httpContext.User.Identity!.Name + " has succesfully been authorized for " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ".");
                     await _next();
                 }
                 else
                 {
                     _logger.LogWarning
-                    ("MAGDA" + httpContext.User.Identity!.Name + " is not authorized to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ". Setting pipeline error");
+                    (httpContext.User.Identity!.Name + " is not authorized to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue + ". Setting pipeline error");
                     httpContext.Items.SetError(new UnauthorizedError(httpContext.User.Identity!.Name + " is not authorized to access " + downstreamRoute.UpstreamPathTemplate.OriginalValue));
                 }
             }
